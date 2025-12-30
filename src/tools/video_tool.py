@@ -1,6 +1,7 @@
 import ffmpeg
 import os
 
+# 从视频文件中提取音频
 def extract_audio_from_video(
     video_path: str,
     output_audio_path: str,
@@ -16,9 +17,9 @@ def extract_audio_from_video(
     :param mono: 是否转为单声道
     :param audio_format: 输出音频格式
     """
-    # 校验视频文件是否存在
-    if not os.path.exists(video_path):
-        raise FileNotFoundError(f"视频文件不存在：{video_path}")
+    # 校验视频文件是否存在，可以注释掉，因为上一层调用函数已经判断
+    # if not os.path.exists(video_path):
+    #     raise FileNotFoundError(f"视频文件不存在：{video_path}")
     
     # 构建 FFmpeg 命令
     stream = ffmpeg.input(video_path)

@@ -1,4 +1,5 @@
 import os
+from uu import Error
 import gradio as gr
 
 from utils import generate_random_filename, save_uploaded_file
@@ -116,10 +117,16 @@ def process_tts(text, ref_audio_file, progress=gr.Progress()):
     #  
     output_audio_path = generate_random_filename("wav")
     model_dir = os.path.join(os.getcwd, "checkpoints/")
-    
-    tts = init_indexTTS2(model_dir)
-    tts.infer(audio_prompt=ref_audio_path, text=text, output_path=output_audio_path, verbose=True)
-    
+    try:
+        tts = init_indexTTS2(model_dir)
+        tts.infer(audio_prompt=ref_audio_path, text=text, output_path=output_audio_path, verbose=True)
+    except FileNotFoundError as e:
+        print(f"语音克隆出现错误: {e} ")
+        raise gr.Error("语音克隆出现错误")
+    except Exception as e:
+        print(f"语音克隆出现错误: {e} ")
+        raise gr.Error("语音克隆出现错误")    
+
     return output_audio_path, output_audio_path
 
 # 根据图片和音频生成视频，对齐口型
