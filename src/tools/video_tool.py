@@ -1,5 +1,8 @@
 import ffmpeg
 import os
+from utils import generate_random_filename
+from constants import ensure_directories
+
 
 # 从视频文件中提取音频
 def extract_audio_from_video(
@@ -33,19 +36,25 @@ def extract_audio_from_video(
     # 重采样
     stream = stream.filter("aresample", target_sr)  
     
+    output_audio_dir = os.path.join(os.getcwd(), output_audio_path)
+    if not os.path.exists(output_audio_dir):
+        ensure_directories()
+
+    file_name = output_audio_dir + "/" + generate_random_filename("wav", "audio", True)    
+    
     # 编码器配置
     if audio_format == "wav":
-        stream = stream.output(output_audio_path, acodec="pcm_s16le")
+        stream = stream.output(file_name, acodec="pcm_s16le")
     elif audio_format == "mp3":
-        stream = stream.output(output_audio_path, acodec="libmp3lame", qscale_a=2)
+        stream = stream.output(file_name, acodec="libmp3lame", qscale_a=2)
     elif audio_format == "aac":
-        stream = stream.output(output_audio_path, acodec="copy")
+        stream = stream.output(file_name, acodec="copy")
     
     # 执行命令（静默模式，不输出日志）
     try: 
-        ffmpeg.run(stream, overwrite_output=True, quiet=True)
-        print(f"✅ 音频提取完成：{output_audio_path}")
-        return output_audio_path, True
+        ffmpeg.run(stream, overwrite_output=True, quiet=False)
+        print(f"✅ 音频提取完成：{file_name}")
+        return file_name, True
     except ffmpeg.Error as e:
         # 4. 执行到这里 = 进程已结束但执行失败
         print(f"FFmpeg执行完成（失败），错误码：{e.exit_code}")

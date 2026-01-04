@@ -5,7 +5,7 @@ import gradio as gr
 from utils import generate_random_filename, save_uploaded_file
 from constants import *  
 from tools.video_tool import extract_audio_from_video
-from tools.audio_tool import transcribe
+from tools.audio_tool_plus import transcribe
 from tools.enhance_text_tool import qwen_generate
 from tools.audio_text_tool import init_indexTTS2
 
@@ -15,18 +15,23 @@ def process_video_to_text(video_file, progress=gr.Progress()):
     if not video_file:
         raise gr.Error("请上传视频文件")
     
+
     # 保存上传的音频
+    progress(0.1, desc="视频文件上传...")
     video_path = save_uploaded_file(video_file, video_upload_path)
     if (video_path == None):
         raise gr.Error("视频文件上载错误")
-    print(f"视频文件 保存在 {video_file}")
+    print(f"视频文件 保存在 {video_path}")
+    progress(0.2, desc="视频文件上传完成")
 
     # to-do: 调用 ffmpeg 获取音频
+    progress(0.3, desc="提取音频...")
     audio_path, isSuccess = extract_audio_from_video(video_path=video_path, output_audio_path=extract_audio_path)
     if isSuccess == False: 
         raise gr.Error("视频提取音频发生错误")
     print(f"音频文件保存在 {audio_path}")
-
+    progress(0.4, desc="音频提取完成")
+    
     # to-do: 调用openai/whisper-small模型提取音频中的文字
     # 下载地址： {
     #           "tiny.en": "https://openaipublic.azureedge.net/main/whisper/models/d3dd57d32accea0b295c96e26691aa14d8822fac7d9d27d5dc00b4ca2826dd03/tiny.en.pt",
@@ -45,29 +50,33 @@ def process_video_to_text(video_file, progress=gr.Progress()):
     # 下载到本地./checkpoints/whipser-small/small.pt
     # 强制离线运行（禁止transformers联网）
 
+    progress(0.5, desc="装载大模型...")
     os.environ["TRANSFORMERS_OFFLINE"] = "1"
     os.environ["HF_DATASETS_OFFLINE"] = "1"
     # model_dir 绝对路径
-    model_dir = os.path.join(os.getcwd, "checkpoints/whisper-model")
-    
+    model_dir = os.path.join(os.getcwd(), "checkpoints/whisper-small/small.pt")
+    progress(0.7, desc="装载大模型完成")
     try:
         # 提取汉字
+        progress(0.8, desc="大模型推理中...")
         audio_text = transcribe(
             model_dir=model_dir,
-            audio_path=audio_path,
+            audio_dir=audio_path,
         )
 
         # 输出结果
         print(f"\n✅ 提取的汉字文本：{audio_text}")
-        return audio_text, video_path
+        progress(1.0, desc="推理结束,提取文字完成")
+        
         
     except FileNotFoundError as e:
-        print(f"提取音频文字出现错误: {e}")
-        raise gr.Error("提取音频文字出现错误")
+        print(f"提取视频文字出现错误: {e}")
+        raise gr.Error("提取视频文字出现错误")
     except Exception as e:
-        print(f"提取音频文字出现错误: {e}")
-        raise gr.Error("提取音频文字出现错误")   
+        print(f"提取视频文字出现错误: {e}")
+        raise gr.Error("提取视频文字出现错误")   
 
+    return audio_text, video_path
     
 # 文本增强
 def process_text_enhancement(original_text, description, progress=gr.Progress()):
@@ -136,7 +145,6 @@ def process_video_generation(image_file, tts_audio_path, progress=gr.Progress())
     if not image_file:
         raise gr.Error("请上传人物正脸图片")
     
-    output_path = generate_random_filename("wav")
     
     # 保存上传的图片
     image_path = save_uploaded_file(image_file, image_upload_path)

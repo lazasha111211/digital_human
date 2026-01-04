@@ -145,6 +145,9 @@ env.bak/
 venv.bak/
 checkpoints/
 .venv/
+outputs/
+inputs/
+extract/
 
 # Spyder project settings
 .spyderproject

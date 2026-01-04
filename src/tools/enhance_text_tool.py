@@ -2,7 +2,7 @@ import torch
 import os
 import warnings
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig 
-from ai_utils import *
+from tools.ai_utils import *
 # 彻底屏蔽无关警告（如参数提示、设备适配）
 warnings.filterwarnings("ignore")
 # ===================== 全局配置（可根据需求调整） =====================

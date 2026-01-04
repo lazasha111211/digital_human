@@ -6,6 +6,7 @@ import uuid
 import random
 import string
 import time
+from constants import ensure_directories
 
 # 保存上载文件到指定文件夹
 def save_uploaded_file(file_path, target_dir):
@@ -22,7 +23,13 @@ def save_uploaded_file(file_path, target_dir):
     file_ext = os.path.splitext(original_filename)[1]
     # 生成唯一文件名避免冲突
     unique_filename = f"{uuid.uuid4()}{file_ext}"
-    save_path = target_dir / unique_filename
+
+    upload_dir = os.path.join(os.getcwd(), target_dir)
+    if not os.path.exists(upload_dir):
+        ensure_directories()
+    
+ 
+    save_path = upload_dir + "/" + unique_filename
     
     # 复制文件到目标目录
     try:

@@ -25,6 +25,8 @@ def create_interface():
                     color: white; /* 可选：如果h1文字也需要白色 */
                     text-align: center; /* 核心：文字水平居中 */
                 }
+
+                
                 span.md.svelte-1hf8a14.prose h2 {
                     color: white; /* 可选：如果h1文字也需要白色 */
                     
@@ -35,6 +37,17 @@ def create_interface():
                 }
                 .spaced-row {
                     margin: 0.1rem 0 !important; /* 上下间距1rem，左右0 */
+                }
+
+                div.svelte-16ln60g > div[data-testid="markdown"].prose.svelte-1xjkzpp > span.md.svelte-1hf8a14.prose > h1 font {
+                    text-align: center !important;
+                    color: white !important;
+                }    
+
+                div.svelte-16ln60g > div[data-testid="markdown"].prose.svelte-1xjkzpp > span.md.svelte-1hf8a14.prose > h2 font {
+                    text-align: center !important;
+                    color: white !important;
+      
                 }
                
             </style>
@@ -52,6 +65,8 @@ def create_interface():
                 with gr.Row():
                     video_input = gr.Video(label="上传视频（支持avi、mov、mp4）",
                                             sources=["upload"],
+                                            width=600,  # 固定宽度（像素）
+                                            height=400, # 固定高度（像素）
                                             format="mp4",
                                             include_audio = True)  
                 with gr.Row():
@@ -61,9 +76,9 @@ def create_interface():
             with gr.Group():
                 gr.Markdown("## ✏️ 2: 文案增强")
                 with gr.Row(elem_classes="spaced-row"):
-                    video_text_output = gr.Textbox(label="视频读取文案结果", lines=4)
+                    video_text_output = gr.Textbox(label="视频读取文案结果", lines=10)
                 with gr.Row():
-                    description_input = gr.Textbox(label="输入加工要求", placeholder="请输入对文案的加工要求...")
+                    description_input = gr.Textbox(label="输入加工要求", placeholder="请输入对文案的加工要求...", lines=3)
                 with gr.Row():
                     enhance_text_btn = gr.Button("增强文案", variant="primary")
         
