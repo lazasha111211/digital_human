@@ -1,7 +1,8 @@
 import whisper
-import jieba
+import jieba_fast as jieba
 import pangu
 import re
+import os
 from zhon.hanzi import punctuation  # 中文标点库
 
 def semantic_sentence_segmentation(text: str) -> str:
@@ -11,6 +12,7 @@ def semantic_sentence_segmentation(text: str) -> str:
     :return: 按语义断句后的文本
     """
     # 步骤1：Jieba 语义分词（获取词边界）
+    jieba.load_userdict(os.path.join(os.getcwd(), "resources/digital_human_dict.txt"))
     words = jieba.lcut(text)  # 精确分词，保留语义完整
     
     # 步骤2：定义语义断句触发词（根据中文句法规则）
