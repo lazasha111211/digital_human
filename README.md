@@ -41,6 +41,28 @@ deepspeed=0.18.3
 #bitsandbytes==0.49.0  # 可选，用于模型量化（降低显存占用）
 #flash-attn  FlashAttention 仅支持 NVIDIA GPU（算力 ≥ 7.0，如 V100/A100/3090/4090），不支持 CPU/AMD GPU/Apple Silicon（M 系列）。
 
+# infinitetalk
+diffusers>=0.31.0
+imageio==2.37.2
+easydict==1.13
+dashscope==1.25.5
+imageio-ffmpeg==0.6.0
+scikit-image==0.25.2
+loguru==0.7.3
+xfuser>=0.4.1
+optimum-quanto==0.2.6
+scenedetect==0.6.7.1
+moviepy==2.2.1
+#decord
+ftfy==6.2.0
+# 适配transformer==4.52.1, 所有英伟达 GPU（CUDA 11.8+/12.x）;如果适配适配最新 CUDA 12.4+， 版本升级为 0.44.1
+bitsandbytes==0.41.1  
+
+# 从音频获取文字
+openai-whisper==20250625
+pangu==4.0.6.1
+zhon==2.1.1
+
 ```
 
 # 模型文件下载
