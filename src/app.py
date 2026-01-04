@@ -66,7 +66,7 @@ def create_interface():
                     video_input = gr.Video(label="上传视频（支持avi、mov、mp4）",
                                             sources=["upload"],
                                             width=600,  # 固定宽度（像素）
-                                            height=400, # 固定高度（像素）
+                                            height=395, # 固定高度（像素）
                                             format="mp4",
                                             include_audio = True)  
                 with gr.Row():
