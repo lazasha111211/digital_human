@@ -65,8 +65,8 @@ def process_video_to_text(video_file, progress=gr.Progress()):
         )
 
         # 输出结果
-        print(f"\n✅ 提取的汉字文本：{audio_text}")
-        progress(1.0, desc="推理结束,提取文字完成")
+        print(f"\n✅ 提取的文本：{audio_text}")
+        progress(1.0, desc="推理结束,提取文本完成")
         
         
     except FileNotFoundError as e:
@@ -84,13 +84,13 @@ def process_text_enhancement(original_text, description, progress=gr.Progress())
     if not original_text:
         raise gr.Error("请先完成第一步音频转文本")
     if not description:
-        raise gr.Error("请输入描述要求")
+        raise gr.Error("请输入文案增强要求")
 
-    # to-do: 调用Qwen/Qwen2.5-1.5B-Instruct大模型实现文本增强 mac 适配版，window 另有版本
+    # to-do: 调用Qwen/Qwen2.5-1.5B-Instruct大模型实现文本增强 mac 适配版（window 另有版本）
     # 下载地址： https://hf-mirror.com/Qwen/Qwen2.5-1.5B-Instruct
     try:
         enhanced_text = qwen_generate(original_text, description)
-        return enhanced_text, None
+        return enhanced_text
     except RuntimeError as e:
         print(f"文字增强操作失败: {e}")
         raise gr.Error("增强文字出现错误")

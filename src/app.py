@@ -78,7 +78,7 @@ def create_interface():
                 with gr.Row(elem_classes="spaced-row"):
                     video_text_output = gr.Textbox(label="视频读取文案结果", lines=10)
                 with gr.Row():
-                    description_input = gr.Textbox(label="输入加工要求", placeholder="请输入对文案的加工要求...", lines=3)
+                    description_input = gr.Textbox(label="输入文案增强要求", placeholder="请输入对文案的加工要求...", lines=3)
                 with gr.Row():
                     enhance_text_btn = gr.Button("增强文案", variant="primary")
         

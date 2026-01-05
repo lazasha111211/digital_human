@@ -141,7 +141,14 @@ def qwen_generate(
     # 解码并清理结果（仅保留生成的内容，剔除 Prompt）
     output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
     final_result = output_text.replace(prompt, "").strip()
+
+    
     # 清理空行和冗余内容
-    final_result = "\n".join([line.strip() for line in final_result.split("\n") if line.strip()])
+    #next_text = "\n".join([line.strip() for line in final_result.split("\n") if line.strip()])
+    
+    
+    final_result = final_result.split("\nassistant\n")[1]
+    
+  
     
     return final_result
