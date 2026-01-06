@@ -107,6 +107,7 @@ def process_tts(text, ref_audio_file, progress=gr.Progress()):
         raise gr.Error("请上传参考音频")
     
     # 保存参考音频
+    progress(0.1, desc="保存音频文件...")
     ref_audio_path = save_uploaded_file(ref_audio_file, audio_upload_path)
 
     #  to-do:调用IndexTeam/IndexTTS-2模型实现语音克隆
@@ -124,11 +125,21 @@ def process_tts(text, ref_audio_file, progress=gr.Progress()):
     #    nvidia/bigvgan_v2_22khz_80band_256x：大规模训练的通用神经声码器
     #         下载地址： https://hf-mirror.com/nvidia/bigvgan_v2_22khz_80band_256x
     #  
-    output_audio_path = generate_random_filename("wav")
-    model_dir = os.path.join(os.getcwd, "checkpoints/")
+
+    output_audio_dir = os.path.join(os.getcwd(), audio_download_path)
+    if not os.path.exists(output_audio_dir):
+        ensure_directories()
+
+    output_audio_path = output_audio_dir + "/" + generate_random_filename("wav", "audio", True) 
+    
+
+    model_dir = os.path.join(os.getcwd(), "checkpoints/IndexTTS-2")
     try:
+        progress(0.2, desc="装载模型...")
         tts = init_indexTTS2(model_dir)
-        tts.infer(audio_prompt=ref_audio_path, text=text, output_path=output_audio_path, verbose=True)
+        progress(0.4, desc="开始合成...")
+        tts.infer(spk_audio_prompt=ref_audio_path, text=text, output_path=output_audio_path, verbose=True)
+        progress(1.0, desc="合成完成")
     except FileNotFoundError as e:
         print(f"语音克隆出现错误: {e} ")
         raise gr.Error("语音克隆出现错误")
