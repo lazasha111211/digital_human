@@ -51,7 +51,7 @@ moviepy==2.2.1
 #decord
 ftfy==6.2.0
 # 适配transformer==4.52.1, 所有英伟达 GPU（CUDA 11.8+/12.x）;如果适配适配最新 CUDA 12.4+， 版本升级为 0.44.1
-bitsandbytes==0.41.1  
+#bitsandbytes==0.41.1  
 
 # 从音频获取文字
 openai-whisper==20250625
