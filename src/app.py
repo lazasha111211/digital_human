@@ -1,10 +1,8 @@
 # app.py（修改布局后）
 import gradio as gr
 
-from model_api import *
+from model_api import process_text_enhancement, process_tts, process_video_generation, process_video_to_text
 from custom_css import footer_hide, gr_divider
-from constants import *
-from utils import *
 
 
 def create_interface():
@@ -22,13 +20,13 @@ def create_interface():
         gr.HTML("""
             <style>
                 span.md.svelte-1hf8a14.prose h1 {
-                    color: white; /* 可选：如果h1文字也需要白色 */
+                    color: white; /* 可选:如果h1文字也需要白色 */
                     text-align: center; /* 核心：文字水平居中 */
                 }
 
                 
                 span.md.svelte-1hf8a14.prose h2 {
-                    color: white; /* 可选：如果h1文字也需要白色 */
+                    color: white; /* 可选:如果h1文字也需要白色 */
                     
                 }
                 .svelte-16ln60g {
@@ -36,7 +34,7 @@ def create_interface():
                     
                 }
                 .spaced-row {
-                    margin: 0.1rem 0 !important; /* 上下间距1rem，左右0 */
+                    margin: 0.1rem 0 !important; /* 上下间距1rem,左右0 */
                 }
 
                 div.svelte-16ln60g > div[data-testid="markdown"].prose.svelte-1xjkzpp > span.md.svelte-1hf8a14.prose > h1 font {
@@ -63,7 +61,7 @@ def create_interface():
             with gr.Group():
                 gr.Markdown("## 🎤 1: 视频读取文案")
                 with gr.Row():
-                    video_input = gr.Video(label="上传视频（支持avi、mov、mp4）",
+                    video_input = gr.Video(label="上传视频(支持avi、mov、mp4)",
                                             sources=["upload"],
                                             width=600,  # 固定宽度（像素）
                                             height=395, # 固定高度（像素）

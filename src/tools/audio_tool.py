@@ -8,7 +8,9 @@ def load_local_whisper_transformers(
     language: str = "Chinese",
     task: str = "transcribe"
 ):
-    """加载本地Whisper模型（无librosa/resampy依赖）"""
+    """
+        加载本地Whisper模型(无librosa/resampy依赖)
+    """
     # 绝对路径校验，避免相对路径问题
     # model_dir = os.path.abspath(model_dir)
     if not os.path.isdir(model_dir):

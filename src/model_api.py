@@ -1,9 +1,8 @@
 import os
-from uu import Error
 import gradio as gr
 
 from utils import generate_random_filename, save_uploaded_file
-from constants import *  
+from constants import video_upload_path, extract_audio_path, audio_upload_path, audio_download_path, image_upload_path, ensure_directories
 from tools.video_tool import extract_audio_from_video
 from tools.audio_tool_plus import transcribe
 from tools.enhance_text_tool import qwen_generate
@@ -19,7 +18,7 @@ def process_video_to_text(video_file, progress=gr.Progress()):
     # 保存上传的音频
     progress(0.1, desc="视频文件上传...")
     video_path = save_uploaded_file(video_file, video_upload_path)
-    if (video_path == None):
+    if (video_path is None):
         raise gr.Error("视频文件上载错误")
     print(f"视频文件 保存在 {video_path}")
     progress(0.2, desc="视频文件上传完成")
@@ -27,7 +26,7 @@ def process_video_to_text(video_file, progress=gr.Progress()):
     # to-do: 调用 ffmpeg 获取音频
     progress(0.3, desc="提取音频...")
     audio_path, isSuccess = extract_audio_from_video(video_path=video_path, output_audio_path=extract_audio_path)
-    if isSuccess == False: 
+    if isSuccess is False: 
         raise gr.Error("视频提取音频发生错误")
     print(f"音频文件保存在 {audio_path}")
     progress(0.4, desc="音频提取完成")

@@ -3,7 +3,6 @@ import jieba_fast as jieba
 import pangu
 import re
 import os
-from zhon.hanzi import punctuation  # 中文标点库
 
 def semantic_sentence_segmentation(text: str) -> str:
     """

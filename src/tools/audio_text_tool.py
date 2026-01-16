@@ -1,7 +1,6 @@
 import os
-import torch
 from indextts.infer_v2 import IndexTTS2
-from tools.ai_utils import *
+from tools.ai_utils import *  # noqa: F403
 
 # ===================== TTS 初始化适配函数 =====================
 def init_indexTTS2(model_dir: str) -> IndexTTS2:

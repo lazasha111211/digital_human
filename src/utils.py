@@ -1,7 +1,6 @@
 import os
 from typing import Optional
 import gradio as gr
-from pathlib import Path
 import uuid
 import random
 import string
@@ -11,7 +10,7 @@ from constants import ensure_directories
 # 保存上载文件到指定文件夹
 def save_uploaded_file(file_path, target_dir):
     """
-    修复：适配Gradio的filepath类型（传入的是文件路径字符串，而非文件对象）
+    修复:适配Gradio的filepath类型(传入的是文件路径字符串，而非文件对象）
     复制上传的文件到指定目录并返回新路径
     """
     if not file_path or not isinstance(file_path, str):
@@ -51,12 +50,12 @@ def generate_random_filename(
     生成随机的  文件名（合规、唯一、易识别）
     
     Args:
-        prefix: 文件名前缀（如 "recording" "audio"）
-        use_timestamp: 是否加入时间戳（格式：YYYYMMDDHHMMSS）
+        prefix: 文件名前缀（如 "recording" "audio")
+        use_timestamp: 是否加入时间戳(格式:YYYYMMDDHHMMSS)
         random_length: 随机字符长度（建议 6-10 位，保证唯一性）
     
     Returns:
-        str: 随机  文件名（如 "audio_20250120153045_8792ab56.wav"）
+        str: 随机  文件名（如 "audio_20250120153045_8792ab56.wav")
     """
     # 1. 定义随机字符池（字母+数字，避免易混淆字符：0/O、1/l）
     safe_chars = string.ascii_lowercase + string.digits

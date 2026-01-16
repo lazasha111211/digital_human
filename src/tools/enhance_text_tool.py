@@ -2,7 +2,7 @@ import torch
 import os
 import warnings
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig 
-from tools.ai_utils import *
+from ai_utils import get_accelerator_device, get_model_kwargs # noqa: F403
 # 彻底屏蔽无关警告（如参数提示、设备适配）
 warnings.filterwarnings("ignore")
 # ===================== 全局配置（可根据需求调整） =====================
@@ -17,9 +17,9 @@ MODEL_NAME = "./checkpoints/Qwen2.5-1.5B-Instruct"
 # 装载模型
 def load_qwen25_15b(model_dir: str = "./checkpoints/Qwen2.5-1.5B-Instruct"):
     """
-    加载 Qwen2.5-1.5B-Instruct：
+    加载 Qwen2.5-1.5B-Instruct:
     1. 加载本地模型
-    2. 通配MPS（macOS）、CPU、GPU（英伟达 CUDA）
+    2. 通配MPS(macOS)、CPU、GPU(英伟达 CUDA)
     3. 如果需要设置全局缓存变量，可以加快后面操作速度
     
     """
@@ -71,7 +71,7 @@ def qwen_generate(
     :param requirements: 对文字的修改/生成要求（不能为空）
     :param model_dir: 模型路径（本地/ Hugging Face 远程）,本地相对路径      
     :param max_new_tokens: 最大生成长度
-    :param temperature: 生成随机性（0-1，越小越稳定）
+    :param temperature: 生成随机性(0-1,越小越稳定）
     :return: 符合要求的最终文本
     """
 
@@ -119,7 +119,7 @@ def qwen_generate(
         inputs = inputs.to(device)
     except RuntimeError as e:
         if "MPS" in str(e):
-            warnings.warn(f"MPS 迁移失败，降级到CPU：{e}")
+            warnings.warn(f"MPS 迁移失败,降级到CPU:{e}")
             device = torch.device("cpu")
             inputs = inputs.to(device)
         else:
