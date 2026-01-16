@@ -74,7 +74,7 @@ def transcribe_audio_to_chinese(
     forced_decoder_ids,
     device: str
 ) -> str:
-    """提取音频中的汉字（纯transformers实现，无额外依赖）"""
+    """提取音频中的汉字(纯transformers实现,无额外依赖）"""
     # 1. 校验音频文件
     if not os.path.exists(audio_path):
         raise FileNotFoundError(f"音频文件不存在：{audio_path}")
@@ -90,7 +90,7 @@ def transcribe_audio_to_chinese(
     ).input_features.to(device)   # 移到指定设备（GPU/CPU）， 既支持 torch.device 对象，也支持 字符串（str）
 
     # 3. 模型推理（优化中文参数）
-    print(f"⚙️ 模型推理中...")
+    print("⚙️ 模型推理中...")
     with torch.no_grad():  # 推理禁用梯度计算
         predicted_ids = model.generate(
             input_features,

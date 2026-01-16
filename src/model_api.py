@@ -157,7 +157,7 @@ def process_video_generation(image_file, tts_audio_path, progress=gr.Progress())
     
     
     # 保存上传的图片
-    image_path = save_uploaded_file(image_file, image_upload_path)
+    save_uploaded_file(image_file, image_upload_path)
     
     # to-do:调用 MeiGen-AI/InfiniteTalk 模型生成视频
     # 下载地址： https://hf-mirror.com/MeiGen-AI/InfiniteTalk  single
