@@ -2,11 +2,12 @@ import os
 import gradio as gr
 
 from utils import generate_random_filename, save_uploaded_file
-from constants import video_upload_path, extract_audio_path, audio_upload_path, audio_download_path, image_upload_path, ensure_directories
+from constants import video_upload_path, extract_audio_path, video_download_path, audio_upload_path, audio_download_path, image_upload_path, ensure_directories
 from tools.video_tool import extract_audio_from_video
 from tools.audio_tool_plus import transcribe
 from tools.enhance_text_tool import qwen_generate
 from tools.audio_text_tool import init_indexTTS2
+from tools.video_infinitetalk_generate import generate_infinitetalk
 
 
 # 视频提取文本
@@ -149,7 +150,7 @@ def process_tts(text, ref_audio_file, progress=gr.Progress()):
     return output_audio_path, output_audio_path
 
 # 根据图片和音频生成视频，对齐口型
-def process_video_generation(image_file, tts_audio_path, progress=gr.Progress()):
+def    process_video_generation(image_file, tts_audio_path, progress=gr.Progress()):
     if not tts_audio_path:
         raise gr.Error("请先完成配音生成")
     if not image_file:
@@ -157,12 +158,17 @@ def process_video_generation(image_file, tts_audio_path, progress=gr.Progress())
     
     
     # 保存上传的图片
-    save_uploaded_file(image_file, image_upload_path)
+    image_path = save_uploaded_file(image_file, image_upload_path)
+    ref_audio = save_uploaded_file(tts_audio_path, audio_upload_path)
     
     # to-do:调用 MeiGen-AI/InfiniteTalk 模型生成视频
     # 下载地址： https://hf-mirror.com/MeiGen-AI/InfiniteTalk  single
     # 调用源码下载： https://github.com/MeiGen-AI/InfiniteTalk
     # 
-    
-    video_path = None
+    video_path = video_download_path + "/" + generate_random_filename("mp4", "video", True)
+    try:
+        video_path= generate_infinitetalk(image_path, ref_audio, video_path)
+        
+    except Exception as e:  
+        raise gr.Error("生成视频发生错误") 
     return video_path, None  

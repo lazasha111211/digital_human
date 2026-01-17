@@ -2,28 +2,25 @@
 import argparse
 import logging
 import os
+from pathlib import Path
 import sys
 import json
 import warnings
 from datetime import datetime
-
-warnings.filterwarnings('ignore')
-
 import random
-
 import torch
 import torch.distributed as dist
-from PIL import Image
 import subprocess
 
-import wan
-from wan.configs import SIZE_CONFIGS, SUPPORTED_SIZES, WAN_CONFIGS
-from wan.utils.utils import str2bool, is_video, split_wav_librosa
-from wan.utils.multitalk_utils import save_video_ffmpeg
-from kokoro import KPipeline
+
+from ..infinitetalk import wan
+from ..infinitetalk.wan.configs import SIZE_CONFIGS, SUPPORTED_SIZES, WAN_CONFIGS
+from ..infinitetalk.wan.utils.utils import str2bool, is_video, split_wav_librosa
+from ..infinitetalk.wan.utils.multitalk_utils import save_video_ffmpeg
+from ..infinitetalk.kokoro import KPipeline
 from transformers import Wav2Vec2FeatureExtractor
-from src.audio_analysis.wav2vec2 import Wav2Vec2Model
-from wan.utils.segvideo import shot_detect
+from ..infinitetalk.src.audio_analysis.wav2vec2 import Wav2Vec2Model
+from ..infinitetalk.wan.utils.segvideo import shot_detect
 
 
 import librosa
@@ -33,13 +30,35 @@ from einops import rearrange
 import soundfile as sf
 import re
 
+from ai_utils import generate_video_cond_json
+
+
+warnings.filterwarnings('ignore')
+'''
+    改写infinitetalk仓库中的 generate_infinitetalk.py, 直接调用 github 提供的源码
+    设置：
+    --ckpt_dir、--infinitetalk_dir、--wav2vec_dir、--save_file, --size, --input_json
+
+'''
+
+# Wan2.1 模型目录
+ckpt_dir_ = os.path.join(os.getcwd(), "checkpoints/Wan2.1-I2V-14B-480P") 
+# wav2vec2 模型目录
+wav2vec_dir_ = os.path.join(os.getcwd(), "checkpoints/chinese-wav2vec2-base")
+# InfiniteTalk 权重 single
+infinitetalk_weight_ = os.path.join(os.getcwd(), "checkpoints/InfiniteTalk/single/infinitetalk.safetensors")
+# 配置文件所在路径
+# config_file_path_ = os.path.join(os.getcwd(), "src/tools/single_image.json") 
 
 def _validate_args(args):
     # Basic check
+    # 设置基础模型路径
     assert args.ckpt_dir is not None, "Please specify the checkpoint directory."
+
+    # 设置的任务：应该是i2v_14B single 图像+音频生成视频
     assert args.task in WAN_CONFIGS, f"Unsupport task: {args.task}"
 
-    # The default sampling steps are 40 for image-to-video tasks and 50 for text-to-video tasks.
+    # 设置采样步数
     if args.sample_steps is None:
         args.sample_steps = 40
 
@@ -49,39 +68,51 @@ def _validate_args(args):
         elif args.size == 'infinitetalk-720':
             args.sample_shift = 11
         else:
-            raise NotImplementedError(f'Not supported size')
+            raise NotImplementedError('Not supported size')
 
-    args.base_seed = args.base_seed if args.base_seed >= 0 else random.randint(
-        0, 99999999)
-    # Size check
-    assert args.size in SUPPORTED_SIZES[
-        args.
-        task], f"Unsupport size {args.size} for task {args.task}, supported sizes are: {', '.join(SUPPORTED_SIZES[args.task])}"
+    # 设置随机种子
+    args.base_seed = args.base_seed if args.base_seed >= 0 else random.randint(0, 99999999)
+    # 设置视频尺寸  infinitetalk-480, 都在SUPPORTED_SIZES， 如果不存在报错
+    assert args.size in SUPPORTED_SIZES[args.task], f"Unsupport size {args.size} for task {args.task}, supported sizes are: {', '.join(SUPPORTED_SIZES[args.task])}"
 
 
-def _parse_args():
+def _parse_args(image_path: str, ref_video: str, save_file_path: str, size: str):
     parser = argparse.ArgumentParser(
         description="Generate a image or video from a text prompt or image using Wan"
     )
     parser.add_argument(
         "--task",
         type=str,
-        default="infinitetalk-14B",
+        default="i2v-14B",
         choices=list(WAN_CONFIGS.keys()),
         help="The task to run.")
     parser.add_argument(
+        "--image_dir",
+        type=str,
+        default=image_path,
+        help="The ref image.") 
+    parser.add_argument(
+        "--ref_video",
+        type=str,
+        default=ref_video,
+        help="The ref video.")        
+    parser.add_argument(
         "--size",
         type=str,
-        default="infinitetalk-480",
+        default=size,
         choices=list(SIZE_CONFIGS.keys()),
         help="The buckget size of the generated video. The aspect ratio of the output video will follow that of the input image."
     )
+
+    # 视频帧率 
     parser.add_argument(
         "--frame_num",
         type=int,
         default=81,
         help="How many frames to be generated in one clip. The number should be 4n+1"
     )
+
+    # 限制生成视频的最大总帧数
     parser.add_argument(
         "--max_frame_num",
         type=int,
@@ -91,28 +122,33 @@ def _parse_args():
     parser.add_argument(
         "--ckpt_dir",
         type=str,
-        default=None,
+        default=ckpt_dir_,
         help="The path to the Wan checkpoint directory.")
     parser.add_argument(
         "--infinitetalk_dir",
         type=str,
-        default=None,
+        default=infinitetalk_weight_,
         help="The path to the InfiniteTalk checkpoint directory.")
+    # 可以缺省为 None
     parser.add_argument(
         "--quant_dir",
         type=str,
         default=None,
         help="The path to the Wan quant checkpoint directory.")
+    # 为    chinese-wav2vec2-base 传值过来
     parser.add_argument(
         "--wav2vec_dir",
         type=str,
-        default=None,
+        default=wav2vec_dir_,
         help="The path to the wav2vec checkpoint directory.")
+    # 用于指定 DIT 模型权重目录，是加载模型的必要参数  可以不设置  
     parser.add_argument(
         "--dit_path",
         type=str,
         default=None,
         help="The path to the Wan checkpoint directory.")
+
+    # 可以不设置    
     parser.add_argument(
         "--lora_dir",
         type=str,
@@ -120,6 +156,7 @@ def _parse_args():
         default=None,
         help="The paths to the LoRA checkpoint files."
     )
+    # 可以不设置
     parser.add_argument(
         "--lora_scale",
         type=float,
@@ -158,10 +195,13 @@ def _parse_args():
         action="store_true",
         default=False,
         help="Whether to use FSDP for DiT.")
+
+    # 这个必须要设置
+    path = Path(save_file_path)
     parser.add_argument(
         "--save_file",
         type=str,
-        default=None,
+        default=path.parent / path.stem,
         help="The file to save the generated image or video to.")
     parser.add_argument(
         "--audio_save_dir",
@@ -173,11 +213,11 @@ def _parse_args():
         type=int,
         default=42,
         help="The seed to use for generating the image or video.")
-    parser.add_argument(
-        "--input_json",
-        type=str,
-        default='examples.json',
-        help="[meta file] The condition path to generate the video.")
+    # parser.add_argument(
+    #     "--input_json",
+    #     type=str,
+    #     default=config_file_path_,
+    #     help="[meta file] The condition path to generate the video.")
     parser.add_argument(
         "--motion_frame",
         type=int,
@@ -213,6 +253,8 @@ def _parse_args():
         required=False,
         help="Maximum parameter quantity retained in video memory, small number to reduce VRAM required",
     )
+
+    # 确实localfile
     parser.add_argument(
         "--audio_mode",
         type=str,
@@ -545,8 +587,17 @@ def generate(args):
         )
     
     generated_list = []
-    with open(args.input_json, 'r', encoding='utf-8') as f:
-        input_data = json.load(f)
+    # 废弃，通过下面代码生成
+    # with open(args.input_json, 'r', encoding='utf-8') as f:
+    #     input_data = json.load(f)
+
+    # 替代上面的配置文件
+    prompt = ""
+    cond_video_path = args.image_path
+    cond_audio = args.ref_audio
+
+
+    input_data = generate_video_cond_json(prompt, cond_video_path, cond_audio)  
         
     wav2vec_feature_extractor, audio_encoder= custom_init('cpu', args.wav2vec_dir)
     args.audio_save_dir = os.path.join(args.audio_save_dir, input_data['cond_video'].split('/')[-1].split('.')[0])
@@ -647,8 +698,7 @@ def generate(args):
         
         if args.save_file is None:
             formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-            formatted_prompt = input_clip['prompt'].replace(" ", "_").replace("/",
-                                                                        "_")[:50]
+            formatted_prompt = input_clip['prompt'].replace(" ", "_").replace("/", "_")[:50]
             args.save_file = f"{args.task}_{args.size.replace('*','x') if sys.platform=='win32' else args.size}_{args.ulysses_size}_{args.ring_size}_{formatted_prompt}_{formatted_time}"
         
         sum_video = torch.cat(generated_list, dim=1)
@@ -656,8 +706,12 @@ def generate(args):
    
     logging.info(f"Saving generated video to {args.save_file}.mp4")  
     logging.info("Finished.")
+    return args.save_file + ".mp4"
 
 
-if __name__ == "__main__":
-    args = _parse_args()
-    generate(args)
+def generate_infinitetalk(image_path: str, ref_video_path: str, save_file_path: str, size: str="infinitetalk-480"): 
+    args = _parse_args(image_path, ref_video_path, save_file_path, size)
+    
+    video_file = generate(args)
+
+    return video_file

@@ -1,6 +1,7 @@
 from typing import Dict, Any
 import torch
 import importlib
+import os
 
 from transformers import BitsAndBytesConfig 
 
@@ -158,5 +159,51 @@ def get_model_kwargs(device: str) -> Dict[str, Any]:
     return model_kwargs          
 
 
+def generate_video_cond_json(
+    prompt: str,
+    cond_video_path: str,
+    cond_audio_dict: dict,
+    ensure_dir: bool = True
+) -> Dict[str, Any]:
+    """
+    生成视频生成条件的JSON文件，格式匹配你提供的示例
+    
+    Args:
+        prompt: 文本描述提示词（生成视频的核心描述）
+        cond_video_path: 参考视频/图片路径（如ref_image.png）
+        cond_audio_dict: 音频路径字典（如{"person1": "examples/single/1.wav"}）
+        save_path: JSON文件保存路径（默认examples.json）
+        ensure_dir: 是否自动创建保存目录（默认True）
+    
+    Raises:
+        ValueError: 若输入参数格式不合法
+        FileNotFoundError: 若指定的音视频文件路径不存在（仅校验，不强制）
+    """
+    # 1. 参数合法性校验
+    # if not isinstance(prompt, str) or len(prompt.strip()) == 0:
+    #     raise ValueError("prompt必须是非空字符串")
+    
+    if not isinstance(cond_video_path, str) or len(cond_video_path.strip()) == 0:
+        raise ValueError("cond_video_path必须是非空字符串")
+    
+    if not isinstance(cond_audio_dict, dict) or len(cond_audio_dict) == 0:
+        raise ValueError("cond_audio_dict必须是非空字典（如{'person1': 'audio_path.wav'}）")
+    
+    # 2. 校验音视频文件路径（仅提示，不强制报错，适配示例文件场景）
+    if not os.path.exists(cond_video_path):
+        print(f"⚠️ 警告：cond_video路径不存在 → {cond_video_path}")
+    
+    for person, audio_path in cond_audio_dict.items():
+        if not os.path.exists(audio_path):
+            print(f"⚠️ 警告：{person}的音频路径不存在 → {audio_path}")
+    
+    # 3. 构建JSON数据结构
+    json_data = {
+        "prompt": prompt,
+        "cond_video": cond_video_path,
+        "cond_audio": cond_audio_dict
+    }
 
+    return json_data
+    
   
