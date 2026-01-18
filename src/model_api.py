@@ -158,7 +158,9 @@ def    process_video_generation(image_file, tts_audio_path, progress=gr.Progress
     
     
     # 保存上传的图片
+    progress(0.1, desc="上传图片...")
     image_path = save_uploaded_file(image_file, image_upload_path)
+    progress(0.2, desc="上传参考音频...")
     ref_audio = save_uploaded_file(tts_audio_path, audio_upload_path)
     
     # to-do:调用 MeiGen-AI/InfiniteTalk 模型生成视频
@@ -167,8 +169,10 @@ def    process_video_generation(image_file, tts_audio_path, progress=gr.Progress
     # 
     video_path = video_download_path + "/" + generate_random_filename("mp4", "video", True)
     try:
+        progress(0.3, desc="开始合成视频...")
         video_path= generate_infinitetalk(image_path, ref_audio, video_path)
-        
+        progress(1.0, desc="开始合成视频完成")
     except Exception as e:  
+        print(f"生成视频发生错误: {e} ")
         raise gr.Error("生成视频发生错误") 
     return video_path, None  
