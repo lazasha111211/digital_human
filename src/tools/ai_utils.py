@@ -197,7 +197,7 @@ def generate_video_cond_json(
         if not os.path.exists(audio_path):
             print(f"⚠️ 警告：{person}的音频路径不存在 → {audio_path}")
     
-    # 3. 构建JSON数据结构
+    # 3. 构建JSON数据结构 内容格式参考 single_image.json
     json_data = {
         "prompt": prompt,
         "cond_video": cond_video_path,

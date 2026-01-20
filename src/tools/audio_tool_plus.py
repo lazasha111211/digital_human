@@ -3,7 +3,9 @@ import jieba_fast as jieba
 import pangu
 import re
 import os
-
+"""
+    使用 whisper 模型从音频中获取文字加强版
+"""
 def semantic_sentence_segmentation(text: str) -> str:
     """
     基于语义的中文断句（核心逻辑）
@@ -63,6 +65,9 @@ def semantic_sentence_segmentation(text: str) -> str:
     
     return final_text    
 
+"""
+    加载模型,转换文字
+"""
 def transcribe(model_dir: str,
                 audio_dir: str, 
                 language: str="Chinese", 

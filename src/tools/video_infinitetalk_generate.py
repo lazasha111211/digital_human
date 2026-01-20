@@ -594,9 +594,10 @@ def generate(args):
     # 替代上面的配置文件
     prompt = ""
     cond_video_path = args.image_path
-    cond_audio = args.ref_audio
+    cond_audio = {"person1": args.ref_audio}
 
-
+   
+    # 配置文件格式参考 single_image.json 
     input_data = generate_video_cond_json(prompt, cond_video_path, cond_audio)  
         
     wav2vec_feature_extractor, audio_encoder= custom_init('cpu', args.wav2vec_dir)

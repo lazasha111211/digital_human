@@ -56,7 +56,7 @@ def test_matmul_same_dtypes():
                 _=torch.matmul(a, b)
                 status = "Supported ✓"
 
-            except (RuntimeError, TypeError) as e:
+            except (RuntimeError, TypeError):
                 status = "Not Supported ✗"
 
             print(f"{str(dtype):<30} {device:<10} {status:<20}")

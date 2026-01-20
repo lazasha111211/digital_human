@@ -5,6 +5,11 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 from ai_utils import get_accelerator_device, get_model_kwargs # noqa: F403
 # 彻底屏蔽无关警告（如参数提示、设备适配）
 warnings.filterwarnings("ignore")
+
+
+"""
+   调用千问模型增强话术
+"""
 # ===================== 全局配置（可根据需求调整） =====================
 # 模型名称/路径
 MODEL_NAME = "./checkpoints/Qwen2.5-1.5B-Instruct"
